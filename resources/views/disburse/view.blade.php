@@ -73,7 +73,7 @@
     }
 
     .text-blue {
-        color: #478fcc !important;
+        color: #888a8d !important;
     }
 
     .pb-25,
