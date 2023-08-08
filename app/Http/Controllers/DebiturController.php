@@ -7,6 +7,7 @@ use App\Http\Requests\HasilRequest;
 use App\Models\AccountOfficer;
 use App\Models\Cabang;
 use App\Models\Debitur;
+use App\Models\Disbursement;
 use App\Models\Fasilitas;
 use App\Models\History;
 use App\Models\Keputusan;
@@ -105,6 +106,7 @@ class DebiturController extends Controller
                         $hasil = ' <a href="debitur/' . $data->id . '/hasilMitra" data-toggle="tooltip" data-id="' . $data->id . '"
                         class="edit btn btn-success btn-sm ">Hasil Fasiltas</a>';
 
+
                         if ($data->status == null) {
                             return $cekfasilitas;
                         } elseif ($data->status == 1) {
@@ -112,16 +114,21 @@ class DebiturController extends Controller
                         } elseif ($data->status == 2) {
                             return $hasil;
                         } elseif ($data->status == 3) {
-                            return '<h5><span class="badge badge-success">Approve Fasilitas</span></h5>';
+                            return '<h5><span class="badge badge-info">Proses SPK Mitra</span></h5>';
                         } elseif ($data->status == 4) {
                             return '<h5><span class="badge badge-danger">Reject Fasilitas</span></h5>';
                         } elseif ($data->status == 5) {
-                            return '<h5><span class="badge badge-info">Proses Akad Kredit</span></h5>';
+                            return '<h5><span class="badge badge-info">Proses Akad</span></h5>';
+                        } elseif ($data->status == 6) {
+                            return '<h5><span class="badge badge-danger">Batal Pengajuan</span></h5>';
+                        } elseif ($data->status == 7) {
+                            return '<h5><span class="badge badge-info">Cek AKad Pusat</span></h5>';
                         }
                     } elseif (Gate::allows('read status cabang')) {
 
-                        $akad = ' <a href="disbursement/' . $data->id . '/downloadberkas" data-toggle="tooltip" data-id="' . $data->id . '" data-original-title="Edit" class="edit btn btn-success btn-sm editdebitur"><i class="mdi mdi-download"></i></a>';
-                        $akad .= ' <a href="#" class="edit btn btn-warning btn-sm ">Input Akad Kredit</a>';
+                        $akad = ' <a href="disbursement/' . $data->id . '/downloadberkas" data-toggle="tooltip" data-id="' . $data->id . '" data-original-title="Edit" class="edit btn btn-success btn-sm editdebitur"><i class="mdi mdi-download">SPK</i></a>';
+                        $akad .= ' <a href="debitur/' . $data->id . '/uploadakad" data-toggle="tooltip" data-id="' . $data->id . '" data-original-title="akad" class="akad btn btn-warning btn-sm uploadakad">Upload Akad</a>';
+
                         if ($data->status == null) {
                             return '<h5><span class="badge badge-info">Proses Pusat</span></h5>';
                         } elseif ($data->status == 1) {
@@ -129,11 +136,15 @@ class DebiturController extends Controller
                         } elseif ($data->status == 2) {
                             return '<h5><span class="badge badge-info">Proses Pusat</span></h5>';
                         } elseif ($data->status == 3) {
-                            return '<h5><span class="badge badge-success">Approve Fasilitas</span></h5>';
+                            return '<h5><span class="badge badge-info">Proses SPK Mitra</span></h5>';
                         } elseif ($data->status == 4) {
                             return '<h5><span class="badge badge-danger">Reject Fasilitas</span></h5>';
                         } elseif ($data->status == 5) {
                             return $akad;
+                        } elseif ($data->status == 6) {
+                            return '<h5><span class="badge badge-danger">Batal Pengajuan</span></h5>';
+                        } elseif ($data->status == 7) {
+                            return '<h5><span class="badge badge-info">Cek AKad Pusat</span></h5>';
                         }
                     } elseif (Gate::allows('read status mitra')) {
                         if ($data->status == 0) {
@@ -351,6 +362,8 @@ class DebiturController extends Controller
         return view('debiturs.pengajuanMitra', compact('data', 'cabang', 'accountofficer', 'perusahaan', 'mitra', 'mitra2'));
     }
 
+
+
     public function ajukan(Request $request, $id)
     {
         // dd($request);
@@ -358,10 +371,12 @@ class DebiturController extends Controller
         $data['status'] = 1;
         $data->save();
 
+
+
         foreach ($request->mitra as $key => $mitra_id) {
             $randomNumber = random_int(1000, 9999);
             $nextAnggotaNumber = $randomNumber + 1;
-            $noFasilitas =  str_pad($nextAnggotaNumber, 6, '0', STR_PAD_LEFT);
+            $noFasilitas = 'FAS' . (auth()->user()->cabang_id) . date('md') .  str_pad($nextAnggotaNumber, 6, '0', STR_PAD_LEFT);
             $mitras['mitra_id']     = $mitra_id;
             $mitras['user_id']      = $request->user_id[$key];
             $mitras['debitur_id']   = $request->debitur_id[$key];
@@ -405,11 +420,17 @@ class DebiturController extends Controller
             return response()->json(['message' => 'Fasilitas not found'], 404);
         }
 
-        $fasilitas->status = $request->input('status');
+        $var = $fasilitas->status2 = $request->input('status');
 
-        if ($request->status == 2) {
+        if ($var == 2) {
             $fasilitas->fasilitas = '3';
+            $fasilitas->save();
+        } elseif ($var == 3) {
+            $fasilitas->fasilitas = '4';
+            $fasilitas->save();
         }
+
+        $var = '2';
         $fasilitas->save();
 
         return response()->json(['message' => 'Status updated successfully'], 200);
@@ -426,8 +447,12 @@ class DebiturController extends Controller
                 $debitur->status = '3';
             } elseif ($request->sttApprovel == 2) {
                 $debitur->status = '4';
+            } elseif ($request->sttApprovel == 3) {
+                $debitur->status = '6';
             }
             $debitur->save();
+
+
 
             return redirect('debitur')->with('success', 'Data dikirim cabang!');
         } catch (\Throwable $e) {
@@ -435,6 +460,58 @@ class DebiturController extends Controller
             return redirect('debitur')->with('error', 'Data gagal Terkirim');
         }
     }
+
+    public function uploadakad(Request $request, $id)
+    {
+        $debitur = Debitur::find($id);
+
+        $disburse = Disbursement::where('debitur_id', $id);
+
+        return view('debiturs.akad', compact('debitur', 'disburse'));
+    }
+
+
+    public function akadstoreMedia(Request $request)
+    {
+        $path = storage_path('tmp/uploads');
+
+        if (!file_exists($path)) {
+            mkdir($path, 0777, true);
+        }
+
+        $file = $request->file('file');
+
+        $name = uniqid() . '_' . trim($file->getClientOriginalName());
+
+        $file->move($path, $name);
+
+        return response()->json([
+            'name' => $name,
+            'original_name' => $file->getClientOriginalName(),
+        ]);
+    }
+
+    public function simpanakad(Request $request, $id)
+    {
+
+        $debitur = Debitur::find($id);
+        $debitur->status = '7';
+        $debitur->tglAkad = $request->tglAkad;
+        $debitur->save();
+
+
+        if ($request->input('akad', []) == !null) {
+            $debitur->clearMediaCollection('akad');
+            foreach ($request->input('akad', []) as $file) {
+                $debitur->addMedia(storage_path('tmp/uploads/' .
+                    $file))->toMediaCollection('akad');
+            }
+        }
+
+        return redirect('debitur')->with('success', 'Data berhasil di simpan!');
+    }
+
+
 
     /**
      * Remove the specified resource from storage.

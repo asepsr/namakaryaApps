@@ -19,13 +19,13 @@
                                 <tr class="table-info">
                                     <th scope="col-3">No.</th>
                                     <th scope="col">No Debitur</th>
+                                    <th scope="col">No Fasilitas</th>
                                     <th scope="col">Tgl Pengajuan</th>
                                     <th scope="col">Tgl Approve</th>
                                     <th scope="col-3">Nama Debitur</th>
                                     <th scope="col">No KTP</th>
                                     <th scope="col">Plafond Approve</th>
                                     <th scope="col">Cabang</th>
-                                    <th scope="col">Mitra</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Action</th>
                                 </tr>
@@ -79,6 +79,10 @@
                         name: 'noDebitur'
                     },
                     {
+                        data: 'noFasilitas',
+                        name: 'noFasilitas'
+                    },
+                    {
                         data: 'tglPengajuan',
                         name: 'tglPengajuan'
                     },
@@ -102,10 +106,6 @@
                     {
                         data: 'cabang_id',
                         name: 'cabang_id'
-                    },
-                    {
-                        data: 'mitra_id',
-                        name: 'mitra_id'
                     },
                     {
                         data: 'status',

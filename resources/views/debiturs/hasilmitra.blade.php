@@ -78,8 +78,8 @@
                             <tr>
                                 <th scope="row">Fasilitas diperiksa Mitra</th>
                                 <td>
-                                    @if ($data->fasilitas == !null)
-                                        @if ($data->fasilitas == 1)
+                                    @if ($data->status == !null)
+                                        @if ($data->status == 1)
                                             <h5><span class="badge badge-success">Approve Fasilitas</span></h5>
                                         @else
                                             <h5><span class="badge badge-danger">Reject Fasilitas</span></h5>
@@ -94,11 +94,13 @@
                             <tr>
                                 <th scope="row">Fasilitas diperiksa Namastra</th>
                                 <td>
-                                    @if ($data->status == !null)
-                                        @if ($data->fasilitas == 1)
+                                    @if ($data->status2 == !null)
+                                        @if ($data->status2 == 1)
                                             <h5><span class="badge badge-success">Approve Fasilitas</span></h5>
-                                        @elseif($data->fasilitas == 2)
+                                        @elseif($data->status2 == 2)
                                             <h5><span class="badge badge-danger">Reject Fasilitas</span></h5>
+                                        @elseif($data->status2 == 3)
+                                            <h5><span class="badge badge-danger">Batal Fasilitas</span></h5>
                                         @endif
                                     @else
                                         <h5><span class="badge badge-warning">Data Pending</span></h5>
@@ -110,13 +112,15 @@
                             <tr>
                                 <td colspan="2">Updated : {{ $data->updateFasilitas }}</td>
                                 <td align="right">
-                                    @if ($data->status == !null || $data->status == !null)
-                                        Status Updated
-                                    @elseif (empty($data->status))
+                                    @if (empty($data->status2))
                                         <button class="btn btn-success btnApprove" data-id="{{ $data->noFasilitas }}"
                                             data-status="1">Approve</button>
                                         <button class="btn btn-danger btnReject" data-id="{{ $data->noFasilitas }}"
                                             data-status="2">Reject</button>
+                                        <button class="btn btn-warning btnBatal" data-id="{{ $data->noFasilitas }}"
+                                            data-status="3">Batal</button>
+                                    @elseif ($data->status2 == !null)
+                                        Data Update
                                     @endif
                                 </td>
                             </tr>
@@ -144,6 +148,7 @@
                                 <option value="0">--Select--</option>
                                 <option value="1">Approve</option>
                                 <option value="2">Reject</option>
+                                <option value="3">Batal Pengajuan</option>
                             </select>
                             @error('sttApprovel')
                                 <p class="text-danger">{{ $message }}</p>
@@ -176,7 +181,7 @@
     <script>
         // AJAX untuk mengirim permintaan update status
         $(document).ready(function() {
-            $('.btnApprove, .btnReject').on('click', function() {
+            $('.btnApprove, .btnReject,.btnBatal').on('click', function() {
                 var id = $(this).data('id');
                 var status = $(this).data('status');
 

@@ -38,6 +38,15 @@
                     <hr />
                     <div class="row">
                         <div class="col-sm-6 col-md-4 col-5">
+                            <label style="font-weight:bold;">Nomor Fasilitas</label>
+                        </div>
+                        <div class="col-md-8 col-6">
+                            {{ $fasilitas->noFasilitas }}
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-sm-6 col-md-4 col-5">
                             <label style="font-weight:bold;">plafond</label>
                         </div>
                         <div class="col-md-8 col-6">
@@ -88,10 +97,12 @@
             </div>
             <div class="col-lg-4 d-flex">
                 <div class="card card-body flex-fill">
-                    <input class="form-control" type="text" value="{{ $debitur->id }}" name="debitur_id" id="debitur_id"
-                        hidden>
-                    <input class="form-control" type="text" value="{{ date('Y-m-d') }}" name="tglDisburs" id="tglDisburs"
-                        hidden>
+                    <input class="form-control" type="text" value="{{ $debitur->id }}" name="debitur_id"
+                        id="debitur_id">
+                    <input class="form-control" type="text" value="{{ $fasilitas->noFasilitas }}" name="noFasilitas"
+                        id="noFasilitas">
+                    <input class="form-control" type="text" value="{{ date('Y-m-d') }}" name="tglDisburs"
+                        id="tglDisburs">
                     <div class="form-group row">
                         <label for="example-text-input" class="col-sm-4 col-form-label">No. SPK</label>
                         <div class="col-sm-12">
@@ -117,7 +128,7 @@
                         <label for="example-text-input" class="col-sm-12 col-form-label">Bunga
                         </label>
                         <div class="col-sm-12">
-                            <input class="form-control @error('bunga') is-invalid @enderror tes" type="number"
+                            <input class="form-control @error('bunga') is-invalid @enderror tes" type="text"
                                 value="{{ old('bunga') }}" name="bunga" id="bunga">
                             @error('bunga')
                                 <p class="text-danger">{{ $message }}</p>

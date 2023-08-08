@@ -34,6 +34,7 @@ class FasilitasController extends Controller
             )
                 ->join('fasilitas', 'debiturs.id', '=', 'fasilitas.debitur_id')
                 ->where('fasilitas.mitra_id', $mitra)
+                ->orderBy('created_at', 'DESC')
                 ->get();
 
 
@@ -55,16 +56,19 @@ class FasilitasController extends Controller
                     $btn = '<a href="fasilitas/' . $data->noFasilitas . '/edit" data-toggle="tooltip" data-id="' . $data->id . '"
                     data-original-title="Edit" class="edit btn btn-success btn-sm editCabang">Check Pengajuan</a>';
 
-                    $approve = '<h5><span class="badge badge-success">Fasilitas Approve</span></h5>';
 
-                    if ($data->fasilitas == null) {
+                    if (empty($data->fasilitas)) {
                         return $btn;
                     } elseif ($data->fasilitas == 1) {
-                        return $approve;
+                        return '<h5><span class="badge badge-success">Approve Fasilitas</span></h5>';
                     } elseif ($data->fasilitas == 2) {
-                        return '<h5><span class="badge badge-danger">Reject Fasilitas</span></h5>';
+                        return '<h5><span class="badge badge-info">Proses Akad namastra</span></h5>';
                     } elseif ($data->fasilitas == 3) {
+                        return '<h5><span class="badge badge-danger">Reject Fasilitas</span></h5>';
+                    } elseif ($data->fasilitas == 4) {
                         return '<h5><span class="badge badge-danger">Batal Pengajuan</span></h5>';
+                    } elseif ($data->fasilitas == 5) {
+                        return 'Ceking Akad Namastra';
                     }
                 })
                 ->editColumn('cabang_id', function ($data) {
@@ -165,6 +169,7 @@ class FasilitasController extends Controller
 
     public function approve(CekRequest $request, $noFasilitas)
     {
+
         $fasilitas =  Fasilitas::where('noFasilitas', $noFasilitas)->first();
 
         if ($fasilitas) {
@@ -172,6 +177,10 @@ class FasilitasController extends Controller
             $fasilitas->slik = $request->statusSlik;
             $fasilitas->note = $request->note;
             $fasilitas->fasilitas = $request->fasilitas;
+
+            if ($request->fasilitas == 1) {
+                $fasilitas->status = '1';
+            }
 
             // Simpan perubahan pada entitas
             $fasilitas->save();
@@ -182,12 +191,15 @@ class FasilitasController extends Controller
             $debitur->save();
 
             $plafond = $debitur->plafond;
-            $plafondRekomendasi = $fasilitas->plafondRekomendasi;
+            $plafondRekomendasi = $request->plafondRekomendasi;
 
-            if ($plafondRekomendasi == null) {
-                $fasilitas->plafondRekomendasi = $plafond;
+
+
+            if ($plafondRekomendasi == !null) {
+                $fasilitas->plafondRekomendasi = $request->plafondRekomendasi;
                 $fasilitas->save();
             } else {
+                $fasilitas->plafondRekomendasi = $plafond;
                 $fasilitas->save();
             }
 

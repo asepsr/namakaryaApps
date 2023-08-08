@@ -26,7 +26,7 @@ class DisburseController extends Controller
         $this->authorize('read disbursement');
         if ($request->ajax()) {
 
-            $mitra_id = auth()->user()->mitra_id;
+            $mitra = auth()->user()->mitra_id;
 
             $debitur = Debitur::select(
                 'debiturs.*',
@@ -35,14 +35,18 @@ class DisburseController extends Controller
                 'fasilitas.noFasilitas',
                 'fasilitas.updated_at as tglApprove',
                 'fasilitas.plafondRekomendasi as plafondApprove',
-                'debiturs.tglPengajuan as tglPengajuan'
+                'debiturs.tglPengajuan as tglPengajuan',
+                'fasilitas.mitra_id as mitraid',
+                'fasilitas.noFasilitas as noFasilitas',
             )
                 ->join('fasilitas', 'debiturs.id', '=', 'fasilitas.debitur_id')
-                ->whereIN('debiturs.status', [3, 5])
-                ->orderBy('tglPengajuan', 'DESC');
+                ->whereIN('debiturs.status', [3, 7])
+                ->whereIN('fasilitas.fasilitas', [1, 2])
+                ->orderBy('created_at', 'DESC');
 
-            if ($mitra_id == !null) {
-                $debitur->where('debiturs.mitra_id', '=', $mitra_id);
+
+            if ($mitra == !null) {
+                $debitur->where('fasilitas.mitra_id', '=', $mitra)->get();
             } else {
                 $debitur->get();
             }
@@ -55,28 +59,35 @@ class DisburseController extends Controller
 
                 ->addColumn('action', function ($row) {
 
-                    $btn = '<a href="disbursement/' . $row->id . '" data-toggle="tooltip" data-id="' . $row->id . '"data-original-title="view" class="edit btn btn-info btn-sm viewdebitur"><i class="mdi mdi-information-outline"></i></a>';
-                    $btn .= ' <a href="disbursement/' . $row->id . '/downloadberkas" data-toggle="tooltip" data-id="' . $row->id . '" data-original-title="Edit" class="edit btn btn-success btn-sm editdebitur"><i class="mdi mdi-download"></i></a>';
+                    $btn = '<a href="disbursement/' . $row->noFasilitas . '" data-toggle="tooltip" data-id="' . $row->noFasilitas . '"data-original-title="view" class="edit btn btn-info btn-sm viewdebitur"><i class="mdi mdi-information-outline"></i></a>';
+                    $btn .= ' <a href="disbursement/' . $row->noFasilitas . '/downloadberkas" data-toggle="tooltip" data-id="' . $row->noFasilitas . '" data-original-title="Edit" class="edit btn btn-success btn-sm editdebitur"><i class="mdi mdi-download"></i></a>';
 
                     return $btn;
                 })
 
 
                 ->editColumn('status', function ($data) {
-                    $btn = '<a href="disbursement/' . $data->id . '/edit" data-toggle="tooltip" data-id="' . $data->id . '"
-                    data-original-title="Edit" class="edit btn btn-success btn-sm editCabang">Disbursement</a>';
+                    $btn = '<a href="disbursement/' . $data->noFasilitas . '/edit" data-toggle="tooltip" data-id="' . $data->noFasilitas . '"
+                    data-original-title="Edit" class="edit btn btn-success btn-sm editCabang">Upload SPK</a>';
+
+                    $hasilakad = ' <a href="debitur/' . $data->noFasilitas . '/cekakad" data-toggle="tooltip" data-id="' . $data->noFasilitas . '"
+                    class="edit btn btn-success btn-sm ">Cek Akad Kredit</a>';
 
                     if (Gate::allows('read status')) {
                         if ($data->status == 3) {
-                            return '<h5><span class="badge badge-info">Proses Disburse Mitra</span></h5>';
+                            return '<h5><span class="badge badge-info">Pengjuan SPK Mitra</span></h5>';
                         } elseif ($data->status == 5) {
                             return '<h5><span class="badge badge-info">Proses Akad Kredit</span></h5>';
+                        } elseif ($data->status == 7) {
+                            return $hasilakad;
                         }
                     } elseif (Gate::allows('read status mitra')) {
                         if ($data->status == 3) {
                             return  $btn;
                         } elseif ($data->status == 5) {
                             return '<h5><span class="badge badge-info">Proses Akad Kredit</span></h5>';
+                        } elseif ($data->status == 7) {
+                            return 'ceking akad namasrta';
                         }
                     }
                 })
@@ -95,9 +106,6 @@ class DisburseController extends Controller
                     return $formatedDate;
                 })
 
-                ->editColumn('mitra_id', function ($data) {
-                    return $data->mitra->name;
-                })
                 ->editColumn('plafondApprove', function ($data) {
                     return number_format($data->plafondApprove);
                 })
@@ -139,6 +147,7 @@ class DisburseController extends Controller
 
         $disbursement = Disbursement::create([
             'debitur_id'    => $request->debitur_id,
+            'noFasilitas'    => $request->noFasilitas,
             'tglDisburs'    => $request->tglDisburs,
             'NoSpk'         => $request->NoSpk,
             'angsuran'      => $request->angsuran,
@@ -165,6 +174,15 @@ class DisburseController extends Controller
         $debitur->status = '5';
         $debitur->save();
 
+        $s = $request->noFasilitas;
+
+        $row = Fasilitas::all()->where('noFasilitas', $s)->first();
+        $fasilitasid = $row->id;
+
+        $fasilitas =  Fasilitas::findOrFail($fasilitasid);
+        $fasilitas->fasilitas = '2';
+        $fasilitas->save();
+
         return redirect('disbursement')->with('success', 'Data berhasil di simpan!');
     }
 
@@ -174,11 +192,18 @@ class DisburseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($noFasilitas)
     {
-        $debitur = Debitur::find($id);
-        $data = Disbursement::with('debitur')->where('debitur_id', $id)->first();
-        $fasilitas = Fasilitas::with('debitur')->where('debitur_id', $id)->first();
+        $fasilitas = Fasilitas::where('noFasilitas', $noFasilitas)->first();
+
+
+        $debiturID = $fasilitas->debitur_id;
+        // dd($debiturID);
+        $debitur = Debitur::find($debiturID);
+        $data = Disbursement::with('debitur')->where('debitur_id', $debiturID)->first();
+        $fasilitas = Fasilitas::with('debitur')->where('noFasilitas', $noFasilitas)->first();
+
+        // dd($fasilitas);
 
         if (empty($data->debitur)) {
             Alert::error('Biaya Belum Diisi');
@@ -200,8 +225,12 @@ class DisburseController extends Controller
         return view('disburse.view', compact('data', 'debitur', 'jmlBiaya', 'fasilitas', 'angsuran', 'cair', 'tglDisburs'));
     }
 
-    public function downloadberkas($id)
+    public function downloadberkas($noFasilitas)
     {
+
+        $disb = Disbursement::all()->where('noFasilitas', $noFasilitas)->first();
+
+        $id = $disb->debitur_id;
         $disburs = Disbursement::where('debitur_id', $id)->first();
         if ($disburs == null) {
             Alert::error('Dokument tidak di temukan');
@@ -226,10 +255,15 @@ class DisburseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($noFasilitas)
     {
-        $debitur = Debitur::find($id);
-        $fasilitas = Fasilitas::all()->where('debitur_id', $id)->first();
+
+        // $debitur = Debitur::find($id);
+        $fasilitas = Fasilitas::all()->where('noFasilitas', $noFasilitas)->first();
+
+        $debitur_id = $fasilitas->debitur_id;
+
+        $debitur = Debitur::find($debitur_id);
 
 
         return view('disburse.edit', compact('debitur', 'fasilitas'));

@@ -13,7 +13,9 @@ class Disbursement extends Model implements HasMedia
 
     protected $fillable = [
         'debitur_id',
+        'noFasilitas',
         'tglDisburs',
+        'tglAkad',
         'NoSpk',
         'angsuran',
         'bunga',

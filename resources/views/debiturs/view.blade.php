@@ -317,28 +317,6 @@
                                                                 </div>
                                                             </div>
                                                             <hr />
-                                                            <div class="row">
-                                                                <div class="col-sm-6 col-md-4 col-5">
-                                                                    <label style="font-weight:bold;">Status
-                                                                        Fasilitas</label>
-                                                                </div>
-                                                                <div class="col-md-8 col-6">
-                                                                    @if ($data->status == 1)
-                                                                        <h5><span class="badge badge-info">On Prosess
-                                                                                Fasilitas</span></h5>
-                                                                    @elseif($data->status == 2)
-                                                                        <h5><span
-                                                                                class="badge badge-success">Pending</span>
-                                                                        </h5>
-                                                                    @elseif($data->status == 3)
-                                                                        <h5><span class="badge badge-success">Approve
-                                                                                Fasilitas</span></h5>
-                                                                    @elseif($data->status == 4)
-                                                                        <h5><span class="badge badge-success">Reject
-                                                                                Fasilitas</span></h5>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
                                                         </div>
                                                         @can('read debitur')
                                                             <div class="tab-pane fade" id="hasil" role="tabpanel"
@@ -418,17 +396,17 @@
                                                                                         Mitra</th>
                                                                                     <td>
                                                                                         @if ($data->fasilitas == !null)
-                                                                                            @if ($data->fasilitas == 1)
+                                                                                            @if ($data->status == 1)
                                                                                                 <h5><span
                                                                                                         class="badge badge-success">Approve
                                                                                                         Fasilitas</span>
                                                                                                 </h5>
-                                                                                            @elseif($data->fasilitas == 2)
+                                                                                            @elseif($data->status == 2)
                                                                                                 <h5><span
                                                                                                         class="badge badge-danger">Reject
                                                                                                         Fasilitas</span>
                                                                                                 </h5>
-                                                                                            @elseif($data->fasilitas == 3)
+                                                                                            @elseif($data->status == 3)
                                                                                                 <h5><span
                                                                                                         class="badge badge-danger">Batal
                                                                                                         Fasilitas</span>
@@ -447,18 +425,18 @@
                                                                                     <th scope="row">Fasilitas diperiksa
                                                                                         Namastra</th>
                                                                                     <td>
-                                                                                        @if ($data->status == !null)
-                                                                                            @if ($data->fasilitas == 1)
+                                                                                        @if ($data->status2 == !null)
+                                                                                            @if ($data->status2 == 1)
                                                                                                 <h5><span
                                                                                                         class="badge badge-success">Approve
                                                                                                         Fasilitas</span>
                                                                                                 </h5>
-                                                                                            @elseif($data->fasilitas == 2)
+                                                                                            @elseif($data->status2 == 2)
                                                                                                 <h5><span
                                                                                                         class="badge badge-danger">Reject
                                                                                                         Fasilitas</span>
                                                                                                 </h5>
-                                                                                            @elseif($data->fasilitas == 3)
+                                                                                            @elseif($data->status2 == 3)
                                                                                                 <h5><span
                                                                                                         class="badge badge-danger">Batal
                                                                                                         Fasilitas</span>

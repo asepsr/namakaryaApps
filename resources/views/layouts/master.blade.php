@@ -60,11 +60,11 @@
 <body>
     @include('sweetalert::alert')
     <!-- Loader -->
-    <div id="preloader">
+    {{-- <div id="preloader">
         <div id="status">
             <div class="spinner"></div>
         </div>
-    </div>
+    </div> --}}
 
     @include('layouts.nav')
 
