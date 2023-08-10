@@ -88,7 +88,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('biaya', BiayaController::class);
     Route::post('disbursement/getdata', [DisburseController::class, 'getdata'])->name('disbursement.getdata');
     Route::post('disbursement/media', [DisburseController::class, 'storeMedia'])->name('disbursement.storeMedia');
-    Route::get('disbursement/{noFasilitas}/downloadberkas', [DisburseController::class, 'downloadberkas']);
+    Route::get('disbursement/{id}/downloadspk', [DisburseController::class, 'downloadspk']);
+    Route::get('disbursement/{id}/downloadakad', [DisburseController::class, 'downloadakad']);
     Route::get('disbursement/{noFasilitas}', [DisburseController::class, 'show'])->name('disbursement.show');
     Route::get('fasilitas', [FasilitasController::class, 'index'])->name('fasilitas.index');
     Route::get('fasilitas/{noFasilitas}/edit', [FasilitasController::class, 'edit'])->name('fasilitas.edit');
@@ -105,7 +106,13 @@ Route::middleware('auth')->group(function () {
     Route::put('debitur/{id}/kirim', [DebiturController::class, 'kirim'])->name('debitur.kirim');
     Route::put('debitur/{id}/simpanakad', [DebiturController::class, 'simpanakad'])->name('debitur.simpanakad');
     Route::get('debitur/{id}/uploadakad', [DebiturController::class, 'uploadakad'])->name('debitur.uploadakad');
+    Route::get('debitur/{noFasilitas}/cekakad', [DebiturController::class, 'cekakad'])->name('debitur.cekakad');
     Route::patch('debitur/{nofasilitas}/fasilitas', [DebiturController::class, 'updateFasilitas'])->name('debitur.updateFasilitas');
+    Route::get('debitur/{id}/akadrevisi', [DebiturController::class, 'akadrevisi'])->name('debitur.akadrevisi');
+    Route::put('debitur/{id}/kirimrevisi', [DebiturController::class, 'kirimrevisi'])->name('debitur.kirimrevisi');
+    Route::put('debitur/{id}/revisiakad', [DebiturController::class, 'revisiakad'])->name('debitur.revisiakad');
+    Route::put('debitur/{id}/approveakad', [DebiturController::class, 'approveakad'])->name('debitur.approveakad');
+    Route::get('debitur/{nofasilitas}/droping', [DebiturController::class, 'droping'])->name('debitur.droping');
     Route::get('slik/dataslik', [SlikController::class, 'dataslik'])->name('slik.dataslik');
     Route::get('slik/allslik', [SlikController::class, 'allslik'])->name('slik.allslik');
     Route::get('slik/{id}/cekslik', [SlikController::class, 'cekslik']);

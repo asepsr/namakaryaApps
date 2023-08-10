@@ -97,12 +97,12 @@
             </div>
             <div class="col-lg-4 d-flex">
                 <div class="card card-body flex-fill">
-                    <input class="form-control" type="text" value="{{ $debitur->id }}" name="debitur_id"
-                        id="debitur_id">
+                    <input class="form-control" type="text" value="{{ $debitur->id }}" name="debitur_id" id="debitur_id"
+                        hidden>
                     <input class="form-control" type="text" value="{{ $fasilitas->noFasilitas }}" name="noFasilitas"
-                        id="noFasilitas">
-                    <input class="form-control" type="text" value="{{ date('Y-m-d') }}" name="tglDisburs"
-                        id="tglDisburs">
+                        id="noFasilitas" hidden>
+                    <input class="form-control" type="text" value="{{ date('Y-m-d') }}" name="tglDisburs" id="tglDisburs"
+                        hidden>
                     <div class="form-group row">
                         <label for="example-text-input" class="col-sm-4 col-form-label">No. SPK</label>
                         <div class="col-sm-12">

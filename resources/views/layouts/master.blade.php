@@ -40,6 +40,9 @@
     <link href="{{ asset('') }}assets/plugins/dropzone/dist/dropzone.css" rel="stylesheet" type="text/css">
     <link href="{{ asset('') }}assets/plugins/dropify/css/dropify.min.css" rel="stylesheet">
 
+    <!-- Summernote css -->
+    <link href="{{ asset('') }}assets/plugins/summernote/summernote-bs4.css" rel="stylesheet" />
+
 
 
     <script src="{{ asset('') }}assets/js/jquery.min.js"></script>
@@ -155,6 +158,8 @@
     <!-- Dropzone js -->
     <script src="{{ asset('') }}assets/plugins/dropzone/dist/dropzone.js"></script>
     <script src="{{ asset('') }}assets/plugins/dropify/js/dropify.min.js"></script>
+    <!--Summernote js-->
+    <script src="{{ asset('') }}assets/plugins/summernote/summernote-bs4.min.js"></script>
 
     @stack('scripts')
 

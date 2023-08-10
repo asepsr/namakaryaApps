@@ -14,6 +14,7 @@ use App\Models\Keputusan;
 use App\Models\Mitra;
 use App\Models\Perusahaan;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -100,9 +101,6 @@ class DebiturController extends Controller
                         $cekfasilitas = '<a href="debitur/' . $data->id . '/pengajuanMitra" data-toggle="tooltip" data-id="' . $data->id . '"
                         class="edit btn btn-success btn-sm ">Pengajuan Mitra</a>';
 
-                        $cekfasilitas .= ' <a href="debitur/' . $data->id . '/download" data-toggle="tooltip" data-id="' . $data->id . '"
-                        class="edit btn btn-primary btn-sm ">Download Berkas</a>';
-
                         $hasil = ' <a href="debitur/' . $data->id . '/hasilMitra" data-toggle="tooltip" data-id="' . $data->id . '"
                         class="edit btn btn-success btn-sm ">Hasil Fasiltas</a>';
 
@@ -123,11 +121,20 @@ class DebiturController extends Controller
                             return '<h5><span class="badge badge-danger">Batal Pengajuan</span></h5>';
                         } elseif ($data->status == 7) {
                             return '<h5><span class="badge badge-info">Cek AKad Pusat</span></h5>';
+                        } elseif ($data->status == 8) {
+                            return '<h5><span class="badge badge-warning">Revisi Data Akad</span></h5>';
+                        } elseif ($data->status == 9) {
+                            return '<h5><span class="badge badge-success">Approve Akad</span></h5>';
+                        } elseif ($data->status == 10) {
+                            return '<h5><span class="badge badge-success">Fasilitas Cair</span></h5>';
                         }
                     } elseif (Gate::allows('read status cabang')) {
 
-                        $akad = ' <a href="disbursement/' . $data->id . '/downloadberkas" data-toggle="tooltip" data-id="' . $data->id . '" data-original-title="Edit" class="edit btn btn-success btn-sm editdebitur"><i class="mdi mdi-download">SPK</i></a>';
+                        $akad = ' <a href="disbursement/' . $data->id . '/downloadspk" data-toggle="tooltip" data-id="' . $data->id . '" data-original-title="Edit" class="edit btn btn-success btn-sm editdebitur"><i class="mdi mdi-download">SPK</i></a>';
+
                         $akad .= ' <a href="debitur/' . $data->id . '/uploadakad" data-toggle="tooltip" data-id="' . $data->id . '" data-original-title="akad" class="akad btn btn-warning btn-sm uploadakad">Upload Akad</a>';
+
+                        $akadrevisi = '<a href="debitur/' . $data->id . '/akadrevisi" data-toggle="tooltip" data-id="' . $data->id . '" data-original-title="akad" class="akad btn btn-warning btn-sm ">cek akad revisi</a>';
 
                         if ($data->status == null) {
                             return '<h5><span class="badge badge-info">Proses Pusat</span></h5>';
@@ -145,6 +152,12 @@ class DebiturController extends Controller
                             return '<h5><span class="badge badge-danger">Batal Pengajuan</span></h5>';
                         } elseif ($data->status == 7) {
                             return '<h5><span class="badge badge-info">Cek AKad Pusat</span></h5>';
+                        } elseif ($data->status == 8) {
+                            return $akadrevisi;
+                        } elseif ($data->status == 9) {
+                            return '<h5><span class="badge badge-success">Approve Akad</span></h5>';
+                        } elseif ($data->status == 10) {
+                            return '<h5><span class="badge badge-success">Fasilitas Cair</span></h5>';
                         }
                     } elseif (Gate::allows('read status mitra')) {
                         if ($data->status == 0) {
@@ -228,42 +241,45 @@ class DebiturController extends Controller
      */
     public function store(DebiturRequest $request)
     {
+        try {
+            $debitur = Debitur::create([
+                'user_id' => auth()->user()->id,
+                'cabang_id' => $request->cabang_id,
+                'mitra_id' => $request->mitra_id,
+                'accountOfficer_id' => $request->accountOfficer_id,
+                'perusahaan_id' => $request->perusahaan_id,
+                'name' => $request->name,
+                'tglPengajuan' => $request->tglPengajuan,
+                'noDebitur' => $request->noDebitur,
+                'noKtp' => $request->noKtp,
+                'alamat' => $request->alamat,
+                'tlp' => $request->tlp,
+                'plafond' => $request->plafond,
+                'jwk' => $request->jwk,
+                'ibuKandung' => $request->ibuKandung,
+                'tmptLahir' => $request->tmptLahir,
+                'tglLahir' => $request->tglLahir,
+                'namaPasangan' => $request->namaPasangan,
+                'tglLahirPasangan' => $request->tglLahirPasangan,
+                'pendidikan' => $request->pendidikan,
+                'statusKawin' => $request->statusKawin,
+                'npwp' => $request->npwp,
+                'domisili' => $request->domisili,
+                'stsTinggal' => $request->stsTinggal,
+                'jenisPekerjaan' => $request->jenisPekerjaan,
+                'lamaBekerja' => $request->lamaBekerja,
+                'gaji' => $request->gaji,
+            ]);
 
-        $debitur = Debitur::create([
-            'user_id' => auth()->user()->id,
-            'cabang_id' => $request->cabang_id,
-            'mitra_id' => $request->mitra_id,
-            'accountOfficer_id' => $request->accountOfficer_id,
-            'perusahaan_id' => $request->perusahaan_id,
-            'name' => $request->name,
-            'tglPengajuan' => $request->tglPengajuan,
-            'noDebitur' => $request->noDebitur,
-            'noKtp' => $request->noKtp,
-            'alamat' => $request->alamat,
-            'tlp' => $request->tlp,
-            'plafond' => $request->plafond,
-            'jwk' => $request->jwk,
-            'ibuKandung' => $request->ibuKandung,
-            'tmptLahir' => $request->tmptLahir,
-            'tglLahir' => $request->tglLahir,
-            'namaPasangan' => $request->namaPasangan,
-            'tglLahirPasangan' => $request->tglLahirPasangan,
-            'pendidikan' => $request->pendidikan,
-            'statusKawin' => $request->statusKawin,
-            'npwp' => $request->npwp,
-            'domisili' => $request->domisili,
-            'stsTinggal' => $request->stsTinggal,
-            'jenisPekerjaan' => $request->jenisPekerjaan,
-            'lamaBekerja' => $request->lamaBekerja,
-            'gaji' => $request->gaji,
-        ]);
+            foreach ($request->input('document', []) as $file) {
 
-        foreach ($request->input('document', []) as $file) {
+                $debitur->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('document');
+            }
 
-            $debitur->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('document');
+            return redirect('debitur')->with('success', 'Data berhasil di simpan!');
+        } catch (\Throwable $e) {
+            return redirect()->route('debitur.index')->with('error', 'Data Tidak berhasil di simpan!.');
         }
-
-        return redirect('debitur')->with('success', 'Data berhasil di simpan!');
     }
 
 
@@ -275,8 +291,13 @@ class DebiturController extends Controller
      */
     public function show($id)
     {
-        $data = Debitur::find($id);
-
+        try {
+            $data = Debitur::findOrFail($id);
+        }
+        // catch(Exception $e) catch any exception
+        catch (ModelNotFoundException $e) {
+            return redirect()->route('debitur.index')->with('error', 'Data Tidak ada');
+        }
         $fasilitas = DB::table('fasilitas')
             ->join('debiturs', 'fasilitas.debitur_id', '=', 'debiturs.id')
             ->join('mitras', 'fasilitas.mitra_id', '=', 'mitras.id')
@@ -296,7 +317,14 @@ class DebiturController extends Controller
      */
     public function edit($id)
     {
-        $data = Debitur::find($id);
+        try {
+            $data = Debitur::findOrFail($id);
+        }
+        // catch(Exception $e) catch any exception
+        catch (ModelNotFoundException $e) {
+            return redirect('debitur')->with('error', 'Data Tidak ada');
+        }
+
         $cabang = Cabang::all();
         $account = AccountOfficer::all();
         $perusahaan = Perusahaan::all();
@@ -312,32 +340,51 @@ class DebiturController extends Controller
      */
     public function update(DebiturRequest $request, $id)
     {
+        try {
 
-        $debitur =  Debitur::findOrFail($id);
-        $debitur->update($request->all());
+            $debitur =  Debitur::findOrFail($id);
+            $debitur->update($request->all());
 
 
-        if ($request->input('document', []) == !null) {
-            $debitur->clearMediaCollection('document');
-            foreach ($request->input('document', []) as $file) {
-                $debitur->addMedia(storage_path('tmp/uploads/' .
-                    $file))->toMediaCollection('document');
+            if ($request->input('document', []) == !null) {
+                $debitur->clearMediaCollection('document');
+                foreach ($request->input('document', []) as $file) {
+                    $debitur->addMedia(storage_path('tmp/uploads/' .
+                        $file))->toMediaCollection('document');
+                }
             }
-        }
 
-        return redirect('debitur')->with('success', 'Data Berhasil Di Update');
+            return redirect('debitur')->with('success', 'Data Berhasil Di Update');
+        } catch (\Throwable $e) {
+            return redirect('debitur')->with('success', 'Data Tidak Berhasil Di Update');
+        }
     }
 
     public function download(Debitur $debitur, $id)
     {
-        $debitur = Debitur::findOrFail($id);
+
+        try {
+            $debitur = Debitur::findOrFail($id);
+        }
+        // catch(Exception $e) catch any exception
+        catch (ModelNotFoundException $e) {
+            return redirect('debitur')->with('error', 'Data Tidak ada');
+        }
+
         $imagesToDownload = $debitur->getMedia('document');
         return MediaStream::create($debitur->name . '.zip')->addMedia($imagesToDownload);
     }
 
     public function downloadberkas($id)
     {
-        $debitur = Debitur::find($id);
+        try {
+            $debitur = Debitur::findOrFail($id);
+        }
+        // catch(Exception $e) catch any exception
+        catch (ModelNotFoundException $e) {
+            return redirect('debitur')->with('error', 'Data Tidak ada');
+        }
+
         $media = $debitur->getFirstMedia('document');
 
         if ($media) {
@@ -353,7 +400,14 @@ class DebiturController extends Controller
 
     public function pengajuanMitra($id)
     {
-        $data = Debitur::find($id);
+        try {
+            $data = Debitur::findOrFail($id);
+        }
+        // catch(Exception $e) catch any exception
+        catch (ModelNotFoundException $e) {
+            return redirect('debitur')->with('error', 'Data Tidak ada');
+        }
+
         $cabang = Cabang::all();
         $accountofficer = AccountOfficer::all();
         $perusahaan = Perusahaan::all();
@@ -366,8 +420,13 @@ class DebiturController extends Controller
 
     public function ajukan(Request $request, $id)
     {
-        // dd($request);
-        $data = Debitur::find($id);
+        try {
+            $data = Debitur::findOrFail($id);
+        }
+        // catch(Exception $e) catch any exception
+        catch (ModelNotFoundException $e) {
+            return redirect('debitur')->with('error', 'Data Tidak ada');
+        }
         $data['status'] = 1;
         $data->save();
 
@@ -439,7 +498,7 @@ class DebiturController extends Controller
     public function kirim(HasilRequest $request, $id)
     {
         try {
-            $debitur = Debitur::find($id);
+            $debitur = Debitur::findOrFail($id);
 
             $debitur->keterangan = $request->keterangan;
 
@@ -461,9 +520,16 @@ class DebiturController extends Controller
         }
     }
 
+
     public function uploadakad(Request $request, $id)
     {
-        $debitur = Debitur::find($id);
+        try {
+            $debitur = Debitur::findOrFail($id);
+        }
+        // catch(Exception $e) catch any exception
+        catch (ModelNotFoundException $e) {
+            return redirect('debitur')->with('error', 'Data Tidak ada');
+        }
 
         $disburse = Disbursement::where('debitur_id', $id);
 
@@ -494,7 +560,14 @@ class DebiturController extends Controller
     public function simpanakad(Request $request, $id)
     {
 
-        $debitur = Debitur::find($id);
+        try {
+            $debitur = Debitur::findOrFail($id);
+        }
+        // catch(Exception $e) catch any exception
+        catch (ModelNotFoundException $e) {
+            return redirect('debitur')->with('error', 'Data Tidak ada');
+        }
+
         $debitur->status = '7';
         $debitur->tglAkad = $request->tglAkad;
         $debitur->save();
@@ -511,6 +584,96 @@ class DebiturController extends Controller
         return redirect('debitur')->with('success', 'Data berhasil di simpan!');
     }
 
+    public function cekakad($noFasilitas)
+    {
+
+        $fasilitas = Fasilitas::where('noFasilitas', $noFasilitas)->first();
+
+        if ($fasilitas == null) {
+            return redirect('debitur')->with('error', 'Data Tidak ada');
+        }
+
+        $debiturID = $fasilitas->debitur_id;
+        // dd($debiturID);
+        $debitur = Debitur::findOrFail($debiturID);
+        $data = Disbursement::with('debitur')->where('debitur_id', $debiturID)->first();
+        $fasilitas = Fasilitas::with('debitur')->where('noFasilitas', $noFasilitas)->first();
+
+        $angsuran = ($fasilitas['plafondRekomendasi'] * ($data['bunga'] / 100)) + ($fasilitas['plafondRekomendasi'] / $debitur['jwk']);
+
+        $date = $data->tglDisburs;
+
+        $tglDisburs = \Carbon\Carbon::createFromFormat('Y-m-d', $date)->format('d M Y');
+
+        return view('disburse.cekakad', compact('data', 'debitur', 'fasilitas', 'angsuran', 'tglDisburs'));
+    }
+
+    public function revisiakad(Request $request, $noFasilitas)
+    {
+
+        $fasilitas = Fasilitas::all()->where('noFasilitas', $noFasilitas)->first();
+
+        $debiturId = $fasilitas->debitur_id;
+
+        $debitur = Debitur::findOrFail($debiturId);
+
+        $debitur->keterangan = $request->keterangan;
+        $debitur->status = '8';
+
+        $debitur->save();
+
+        return redirect('debitur')->with('success', 'Data berhasil di simpan!');
+    }
+
+    public function akadrevisi($id)
+    {
+        $debitur = Debitur::findOrFail($id);
+
+        return view('debiturs.cekrevisiakad', compact('debitur'));
+    }
+
+    public function kirimrevisi(Request $request, $id)
+    {
+        $debitur = Debitur::findOrFail($id);
+
+        if ($request->input('akad', []) == !null) {
+            $debitur->clearMediaCollection('akad');
+            foreach ($request->input('akad', []) as $file) {
+                $debitur->addMedia(storage_path('tmp/uploads/' .
+                    $file))->toMediaCollection('akad');
+            }
+        }
+
+        $debitur->status = '7';
+
+        $debitur->save();
+
+        return redirect('debitur')->with('success', 'Data berhasil di simpan!');
+    }
+
+    public function approveakad($id)
+    {
+        $debitur = Debitur::findOrFail($id);
+
+        $debitur->status = '9';
+        $debitur->tglCair =
+            $debitur->save();
+
+
+        return redirect('debitur')->with('success', 'Approve Akad Berhasil');
+    }
+
+    public function droping($id)
+    {
+        $date = \Carbon\Carbon::now();
+
+        $debitur = Debitur::findOrFail($id);
+        $debitur->status = '10';
+        $debitur->tglCair = $date;
+        $debitur->save();
+
+        return redirect('disbursement')->with('success', 'Fasilitas Berhasil Pencairan');
+    }
 
 
     /**

@@ -181,7 +181,7 @@
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="text-center text-150">
-                                            <h4><span class="text-default-d3">Bukti Pencairan Kredit</span></h4>
+                                            <h4><span class="text-default-d3">Bukti Biaya Kredit</span></h4>
                                         </div>
                                     </div>
                                 </div>
@@ -240,8 +240,8 @@
                                     <div class="text-95 text-secondary-d3">
                                         <div class="row mb-2 mb-sm-0 py-25">
                                             <div class="d-none d-sm-block col-1">1</div>
-                                            <div class="col-9 col-sm-5">Biaya Bunga</div>
-                                            <div class="col-2 text-secondary-d2">{{ number_format($data->bunga, 2) }} %
+                                            <div class="col-5 col-sm-5">Biaya Bunga</div>
+                                            <div class="col-6 text-secondary-d2">{{ number_format($data->bunga, 2) }} %
                                             </div>
                                         </div>
 

@@ -39,6 +39,8 @@ class Debitur extends Model implements HasMedia
         'jenisPekerjaan',
         'lamaBekerja',
         'gaji',
+        'tglAkad',
+        'tglCair',
         'status',
         'keterangan',
         'sttApprovel',

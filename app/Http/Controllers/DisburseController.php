@@ -40,7 +40,7 @@ class DisburseController extends Controller
                 'fasilitas.noFasilitas as noFasilitas',
             )
                 ->join('fasilitas', 'debiturs.id', '=', 'fasilitas.debitur_id')
-                ->whereIN('debiturs.status', [3, 7])
+                ->whereIN('debiturs.status', [3, 7, 9, 10])
                 ->whereIN('fasilitas.fasilitas', [1, 2])
                 ->orderBy('created_at', 'DESC');
 
@@ -60,7 +60,7 @@ class DisburseController extends Controller
                 ->addColumn('action', function ($row) {
 
                     $btn = '<a href="disbursement/' . $row->noFasilitas . '" data-toggle="tooltip" data-id="' . $row->noFasilitas . '"data-original-title="view" class="edit btn btn-info btn-sm viewdebitur"><i class="mdi mdi-information-outline"></i></a>';
-                    $btn .= ' <a href="disbursement/' . $row->noFasilitas . '/downloadberkas" data-toggle="tooltip" data-id="' . $row->noFasilitas . '" data-original-title="Edit" class="edit btn btn-success btn-sm editdebitur"><i class="mdi mdi-download"></i></a>';
+                    $btn .= ' <a href="disbursement/' . $row->id . '/downloadspk" data-toggle="tooltip" data-id="' . $row->id . '" data-original-title="Edit" class="edit btn btn-success btn-sm editdebitur"><i class="mdi mdi-download"></i></a>';
 
                     return $btn;
                 })
@@ -72,6 +72,13 @@ class DisburseController extends Controller
 
                     $hasilakad = ' <a href="debitur/' . $data->noFasilitas . '/cekakad" data-toggle="tooltip" data-id="' . $data->noFasilitas . '"
                     class="edit btn btn-success btn-sm ">Cek Akad Kredit</a>';
+                    $hasilakad .= ' <a href="disbursement/' . $data->id . '/downloadakad" data-toggle="tooltip" data-id="' . $data->id . '" 
+                    data-original-title="Edit" class="edit btn btn-success btn-sm editdebitur"><i class="mdi mdi-download">akad</i></a>';
+
+                    $droping = '<a href="debitur/' . $data->id . '/droping" data-toggle="tooltip" data-id="' . $data->id . '"
+                    class="edit btn btn-success btn-sm ">Pencairan</a>';
+                    $droping .= ' <a href="disbursement/' . $data->id . '/droping" data-toggle="tooltip" data-id="' . $data->id . '" 
+                    data-original-title="Edit" class="edit btn btn-success btn-sm editdebitur"><i class="mdi mdi-download">akad</i></a>';
 
                     if (Gate::allows('read status')) {
                         if ($data->status == 3) {
@@ -80,6 +87,10 @@ class DisburseController extends Controller
                             return '<h5><span class="badge badge-info">Proses Akad Kredit</span></h5>';
                         } elseif ($data->status == 7) {
                             return $hasilakad;
+                        } elseif ($data->status == 9) {
+                            return '<h5><span class="badge badge-success">Approve Akad</span></h5>';
+                        } elseif ($data->status == 10) {
+                            return '<h5><span class="badge badge-success">Fasilitas Cair</span></h5>';
                         }
                     } elseif (Gate::allows('read status mitra')) {
                         if ($data->status == 3) {
@@ -87,7 +98,11 @@ class DisburseController extends Controller
                         } elseif ($data->status == 5) {
                             return '<h5><span class="badge badge-info">Proses Akad Kredit</span></h5>';
                         } elseif ($data->status == 7) {
-                            return 'ceking akad namasrta';
+                            return '<h5><span class="badge badge-info">Ceking Akad Namastra</span></h5>';
+                        } elseif ($data->status == 9) {
+                            return $droping;
+                        } elseif ($data->status == 10) {
+                            return '<h5><span class="badge badge-success">Fasilitas Cair</span></h5>';
                         }
                     }
                 })
@@ -225,18 +240,16 @@ class DisburseController extends Controller
         return view('disburse.view', compact('data', 'debitur', 'jmlBiaya', 'fasilitas', 'angsuran', 'cair', 'tglDisburs'));
     }
 
-    public function downloadberkas($noFasilitas)
+    public function downloadspk($id)
     {
 
-        $disb = Disbursement::all()->where('noFasilitas', $noFasilitas)->first();
-
-        $id = $disb->debitur_id;
         $disburs = Disbursement::where('debitur_id', $id)->first();
+
         if ($disburs == null) {
             Alert::error('Dokument tidak di temukan');
             return redirect('disbursement');
         }
-        $download = Disbursement::find($disburs->id);
+        $download = Disbursement::find($id);
         $media = $download->getFirstMedia('spk');
 
         if ($media) {
@@ -249,6 +262,32 @@ class DisburseController extends Controller
             return redirect('disbursement');
         }
     }
+
+    public function downloadakad($id)
+    {
+
+        $disburs = Disbursement::where('debitur_id', $id)->first();
+        $debiturId = $disburs->debitur_id;
+
+        $debitur = Debitur::find($debiturId);
+        if ($debitur == null) {
+            Alert::error('Dokument tidak di temukan');
+            return redirect('disbursement');
+        }
+        $download = Debitur::find($debiturId);
+        $media = $download->getFirstMedia('akad');
+
+        if ($media) {
+            // Jika gambar ada, lakukan proses download
+            $imagesToDownload = $download->getMedia('akad');
+            return MediaStream::create('AKAD-' . $download->name . '.zip')->addMedia($imagesToDownload);
+        } else {
+            // Jika gambar tidak ada, berikan tanggapan sesuai kebutuhan
+            Alert::error('Dokument tidak di temukan', 'Belum ada berkas yang di upload');
+            return redirect('disbursement');
+        }
+    }
+
     /**
      * Show the form for editing the specified resource.
      *
