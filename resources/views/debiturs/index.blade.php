@@ -29,7 +29,7 @@
                                     <th scope="col-3">Nama Debitur</th>
                                     <th scope="col">No KTP</th>
                                     <th scope="col">Plafond</th>
-                                    <th scope="col">Jangka Waktu</th>
+                                    <th scope="col">JKW</th>
                                     <th scope="col">Cabang</th>
                                     <th scope="col">Nama Perusahaan</th>
                                     <th scope="col">Created</th>

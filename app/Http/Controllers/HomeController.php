@@ -31,6 +31,65 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $cabang = auth()->user()->cabang_id;
+        $mitra_id = auth()->user()->mitra_id;
+
+        if ($mitra_id >= 1) {
+            $debCount = Fasilitas::join('debiturs', 'debiturs.id', '=', 'fasilitas.debitur_id')
+                ->where('fasilitas.mitra_id', $mitra_id)
+                ->get(['debiturs.*', 'debiturs.id'])->count('id');
+
+            $plafond = Fasilitas::join('debiturs', 'debiturs.id', '=', 'fasilitas.debitur_id')
+                ->where('fasilitas.mitra_id', $mitra_id)
+                ->where('fasilitas.status', '1')
+                ->get(['debiturs.*', 'fasilitas.plafondRekomendasi'])->sum('plafondRekomendasi');
+
+            $pencairan = Fasilitas::join('debiturs', 'debiturs.id', '=', 'fasilitas.debitur_id')
+                ->whereIn('fasilitas.status2', [1])
+                ->where('fasilitas.mitra_id', $mitra_id)
+                ->get(['debiturs.*', 'fasilitas.plafondRekomendasi'])->sum('plafondRekomendasi');
+
+            $pending = Fasilitas::join('debiturs', 'debiturs.id', '=', 'fasilitas.debitur_id')
+                ->whereNotIn('fasilitas.fasilitas', [2, 4])
+                ->where('fasilitas.mitra_id', $mitra_id)
+                ->get(['debiturs.*', 'fasilitas.plafondRekomendasi'])->sum('plafondRekomendasi');
+        } elseif ($cabang >= 1) {
+
+            $debCount = Fasilitas::join('debiturs', 'debiturs.id', '=', 'fasilitas.debitur_id')
+                ->where('fasilitas.cabang_id', $cabang)
+                ->where('fasilitas.status2', '1')
+                ->get(['debiturs.*', 'debiturs.id'])->count('id');
+
+            $plafond = Fasilitas::join('debiturs', 'debiturs.id', '=', 'fasilitas.debitur_id')
+                ->where('fasilitas.cabang_id', $cabang)
+                ->where('fasilitas.status2', '1')
+                ->get(['debiturs.*', 'fasilitas.plafondRekomendasi'])->sum('plafondRekomendasi');
+
+            $pencairan = Fasilitas::join('debiturs', 'debiturs.id', '=', 'fasilitas.debitur_id')
+                ->whereIn('fasilitas.status2', [1])
+                ->where('fasilitas.cabang_id', $cabang)
+                ->get(['debiturs.*', 'fasilitas.plafondRekomendasi'])->sum('plafondRekomendasi');
+
+            $pending = Fasilitas::join('debiturs', 'debiturs.id', '=', 'fasilitas.debitur_id')
+                ->whereNotIn('fasilitas.fasilitas', [2, 4])
+                ->where('fasilitas.cabang_id', $cabang)
+                ->get(['debiturs.*', 'fasilitas.plafondRekomendasi'])->sum('plafondRekomendasi');
+        } elseif ($cabang >= 0) {
+            $debCount = Debitur::count();
+
+            $plafond = Fasilitas::join('debiturs', 'debiturs.id', '=', 'fasilitas.debitur_id')
+                ->where('fasilitas.status2', '1')
+                ->get(['debiturs.*', 'fasilitas.plafondRekomendasi'])->sum('plafondRekomendasi');
+
+            $pencairan = Fasilitas::join('debiturs', 'debiturs.id', '=', 'fasilitas.debitur_id')
+                ->whereIn('fasilitas.status2', [1])
+                ->get(['debiturs.*', 'fasilitas.plafondRekomendasi'])->sum('plafondRekomendasi');
+
+            $pending = Fasilitas::join('debiturs', 'debiturs.id', '=', 'fasilitas.debitur_id')
+                ->whereNotIn('fasilitas.fasilitas', [2, 4])
+                ->get(['debiturs.*', 'fasilitas.plafondRekomendasi'])->sum('plafondRekomendasi');
+        }
+
+        return view('home', compact('debCount', 'plafond', 'pencairan', 'pending'));
     }
 }

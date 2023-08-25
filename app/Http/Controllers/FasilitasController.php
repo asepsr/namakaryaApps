@@ -34,7 +34,7 @@ class FasilitasController extends Controller
             )
                 ->join('fasilitas', 'debiturs.id', '=', 'fasilitas.debitur_id')
                 ->where('fasilitas.mitra_id', $mitra)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('tglPengajuan', 'DESC')
                 ->get();
 
 

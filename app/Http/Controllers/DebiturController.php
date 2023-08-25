@@ -43,7 +43,7 @@ class DebiturController extends Controller
         if ($request->ajax()) {
 
 
-            $data = Debitur::orderBy('id', 'DESC')->get();
+            $data = Debitur::orderBy('tglPengajuan', 'DESC')->get();
             $cabang = auth()->user()->cabang_id;
             $mitra = auth()->user()->mitra_id;
 
